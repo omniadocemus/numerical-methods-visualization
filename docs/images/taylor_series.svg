@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200">
+  <!-- True Function (Sine wave-ish) -->
+  <path d="M 50 100 Q 125 0, 200 100 T 350 100" stroke="#3b82f6" stroke-width="4" fill="none"/>
+  <!-- Approximation (Linear/Quadratic) -->
+  <path d="M 150 150 Q 200 100, 250 50" stroke="#ef4444" stroke-width="3" stroke-dasharray="5,5" fill="none"/>
+  <circle cx="200" cy="100" r="5" fill="#1e3a8a"/>
+  <text x="200" y="125" text-anchor="middle" font-family="sans-serif" fill="#1e3a8a">Expansion Point</text>
+  <text x="300" y="30" text-anchor="middle" font-family="sans-serif" fill="#ef4444" font-size="12">Approximation</text>
+  <text x="350" y="120" text-anchor="middle" font-family="sans-serif" fill="#3b82f6" font-size="12">True Function</text>
+</svg>

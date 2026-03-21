@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200">
+  <!-- Accuracy (Close to center, but maybe scattered) -->
+  <g transform="translate(100, 100)">
+    <circle cx="0" cy="0" r="80" fill="#e2e8f0" stroke="#94a3b8" stroke-width="2"/>
+    <circle cx="0" cy="0" r="60" fill="#cbd5e1" stroke="#94a3b8" stroke-width="2"/>
+    <circle cx="0" cy="0" r="40" fill="#94a3b8" stroke="#64748b" stroke-width="2"/>
+    <circle cx="0" cy="0" r="20" fill="#ef4444" stroke="#b91c1c" stroke-width="2"/>
+    <circle cx="5" cy="-5" r="4" fill="#1e3a8a"/>
+    <circle cx="-3" cy="4" r="4" fill="#1e3a8a"/>
+    <circle cx="2" cy="6" r="4" fill="#1e3a8a"/>
+    <text x="0" y="100" text-anchor="middle" font-family="sans-serif" font-weight="bold" fill="#334155">Accurate (Centered)</text>
+  </g>
+  <!-- Precision (Clustered, but maybe off-center) -->
+  <g transform="translate(300, 100)">
+    <circle cx="0" cy="0" r="80" fill="#e2e8f0" stroke="#94a3b8" stroke-width="2"/>
+    <circle cx="0" cy="0" r="60" fill="#cbd5e1" stroke="#94a3b8" stroke-width="2"/>
+    <circle cx="0" cy="0" r="40" fill="#94a3b8" stroke="#64748b" stroke-width="2"/>
+    <circle cx="0" cy="0" r="20" fill="#ef4444" stroke="#b91c1c" stroke-width="2"/>
+    <circle cx="45" cy="-45" r="4" fill="#1e3a8a"/>
+    <circle cx="42" cy="-48" r="4" fill="#1e3a8a"/>
+    <circle cx="48" cy="-42" r="4" fill="#1e3a8a"/>
+    <text x="0" y="100" text-anchor="middle" font-family="sans-serif" font-weight="bold" fill="#334155">Precise (Clustered)</text>
+  </g>
+</svg>
