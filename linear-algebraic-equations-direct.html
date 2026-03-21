@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linear Algebraic Equations (Direct Methods) - Course Viewer</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Export Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:ital,wght@0,400;0,600;1,400&display=swap');
+
+        /* Slide Container - Fixed 16:9 Aspect Ratio */
+        .slide-preview-container {
+            width: 1280px;
+            height: 720px;
+            background-color: white;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        .slide-header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e40af 100%);
+            padding: 2rem 4rem;
+            color: white;
+            flex-shrink: 0;
+            border-bottom: 6px solid #fbbf24; /* Amber accent */
+        }
+
+        .slide-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 3rem;
+            font-weight: 800;
+            margin: 0;
+            line-height: 1.1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .slide-body {
+            flex-grow: 1;
+            padding: 2rem 4rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8fafc;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 24px 24px;
+            overflow: hidden;
+        }
+
+        .slide-content-wrapper {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 2rem;
+            width: 100%;
+            height: 100%;
+        }
+
+        .slide-text-col {
+            flex: 1;
+            font-size: 1.15rem;
+            color: #334155;
+            line-height: 1.35;
+            font-weight: 500;
+            white-space: pre-line;
+            max-height: 100%;
+            overflow-y: hidden;
+            padding-right: 0.5rem;
+        }
+
+        .slide-image-col {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            max-width: 45%; 
+        }
+
+        .slide-image {
+            max-width: 100%;
+            max-height: 350px;
+            width: auto;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: white;
+            padding: 10px;
+            display: block;
+        }
+        
+        .slide-footer {
+            background-color: #f1f5f9;
+            border-top: 2px solid #e2e8f0;
+            padding: 1rem 3rem;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .slide-taglish-text {
+            font-size: 1.25rem;
+            color: #475569;
+            font-style: italic;
+            text-align: center;
+            font-family: 'Open Sans', sans-serif;
+            line-height: 1.4;
+            background: #e2e8f0;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            border-left: 6px solid #64748b;
+        }
+
+        /* Sidebar Styling */
+        .sidebar-item-active {
+            background-color: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            color: #1e3a8a;
+        }
+    </style>
+</head>
+<body class="bg-gray-800 h-screen overflow-hidden text-slate-800 font-sans">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const SLIDES = [
+            {
+                id: 1,
+                title: "Linear Algebraic Equations: Direct Methods",
+                english: "Direct methods for solving linear algebraic equations (Ax = B) are algorithms that provide an exact solution in a finite number of steps, assuming no round-off errors.\n\nKey methods include:\n1. Gaussian Elimination\n2. Gauss-Jordan Elimination\n3. LU Decomposition",
+                taglish: "\"Ang Direct Methods ay mga techniques para i-solve ang system of equations (yung may x, y, at z) sa isang diretshong paraan. Kung walang round-off error, makukuha mo dapat ang exact answer sa set number of steps lang. Hindi ito 'guess and check' gaya ng Iterative Methods.\"",
+                image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMjAwIj4KICA8cmVjdCB4PSI1MCIgeT0iNTAiIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjZTEeOGYwIiBzdHJva2U9IiM5NGEzYjgiIHN0cm9rZS13aWR0aD0iMiIvPgogIDx0ZXh0IHg9IjEwMCIgeT0iMTA1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IiMzMzQxNTUiPltBXXt4fTwvdGV4dD4KICA8dGV4dCB4PSIxNzUiIHk9IjEwNSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjMzM0MTU1Ij49PC90ZXh0PgogIDxyZWN0IHg9IjIwMCIgeT0iNTAiIHdpZHRoPSI0MCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNjYmQ1ZTEiIHN0cm9rZT0iIzk0YTNiOCIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPHRleHQgeD0iMjIwIiB5PSIxMDUiHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0iIzMzNDE1NSI+W0JdPC90ZXh0Pgo8L3N2Zz4="
+            },
+            {
+                id: 2,
+                title: "1. Gaussian Elimination",
+                english: "This is the primary method for solving systems of linear equations. It transforms the system into an Upper Triangular form through systematic row operations.\n\nTwo Main Phases:\n1. Forward Elimination (to create zeros below the diagonal)\n2. Back Substitution (to find the values of unknowns starting from the bottom)",
+                taglish: "\"Ito ang pinaka-popular na direct method. Ang goal natin dito ay gawing 'Upper Triangular' yung matrix natin—yung mga numbers sa baba ng diagonal ay gagawing zero. Pag nakuha mo na yun, madali na makuha ang values ng x, y, at z gamit ang Back Substitution.\"",
+                image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMjAwIj4KICA8ZyBmaWxsPSJub25lIiBzdHJva2U9IiM5NGEzYjgiIHN0cm9rZS13aWR0aD0iMSI+CiAgICA8cmVjdCB4PSIxMDAiIHk9IjQwIiB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIvPgogIDwvZz4KICA8ZyBmaWxsPSIjMWUzYThhIj4KICAgIDxjaXJjbGUgY3g9IjEyMCIgY3k9IjYwIiByPSI1Ii8+CiAgICA8Y2lyY2xlIGN4PSIxNjAiIGN5PSI2MCIgcj0iNSIvPgogICAgPGNpcmNsZSBjeD0iMjAwIiBjeT0iNjAiIHI9IjUiLz4KICAgIDxjaXJjbGUgY3g9IjE2MCIgY3k9IjEwMCIgcj0iNSIvPgogICAgPGNpcmNsZSBjeD0iMjAwIiBjeT0iMTAwIiByPSI1Ii8+CiAgICA8Y2lyY2xlIGN4PSIyMDAiIGN5PSIxNDAiIHI9IjUiLz4KICA8L2c+CiAgPGcgZmlsbD0iI2U1ZThmMCI+CiAgICA8Y2lyY2xlIGN4PSIxMjAiIGN5PSIxMDAiIHI9IjUiLz4KICAgIDxjaXJjbGUgY3g9IjEyMCIgY3k9IjE0MCIgcj0iNSIvPgogICAgPGNpcmNsZSBjeD0iMTYwIiBjeT0iMTQwIiByPSI1Ii8+CiAgPC9nPgogIDx0ZXh0IHg9IjIwMCIgeT0iMTgwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNjQ3NDhiIj5VcHBlciBUcmlhbmd1bGFyIEZvcm08L3RleHQ+Cjwvc3ZnPg=="
+            },
+            {
+                id: 3,
+                title: "2. Forward Elimination",
+                english: "In this phase, we use the first equation to eliminate the first unknown from the rest of the equations. Then use the second equation to eliminate the second unknown from the third onwards, and so on.\n\nMultipliers are calculated as: m = a_ij / a_jj\nNew Row = Current Row - (m * Pivot Row)",
+                taglish: "\"Sa phase na ito, 'buburahin' natin ang mga variables sa ilalim ng bawat pivot. Kunwari sa first row, gagamitin mo yun para maging zero ang x sa rows sa ilalim niya. Ulit-ulitin mo lang hanggang maging triangular na yung matrix.\""
+            },
+            {
+                id: 4,
+                title: "3. Back Substitution",
+                english: "After forward elimination, the last equation has only one unknown. We solve it first, then substitute it back into the second-to-last equation to solve for the next unknown.\n\nx_n = b_n / a_nn\nx_i = (b_i - Σ a_ij * x_j) / a_ii",
+                taglish: "\"Pag triangular na, start tayo sa pinaka-bottom na equation kasi isa na lang ang variable dun. Solve for that, tapos i-substitute mo pataas hanggang mahanap mo na lahat ng values. Parang domino effect!\""
+            },
+            {
+                id: 5,
+                title: "4. Gauss-Jordan Elimination",
+                english: "An extension of Gaussian elimination where row operations are used to transform the matrix into an Identity Matrix (Reduced Row Echelon Form).\n\nUnlike Gaussian elimination, back substitution is not needed because each unknown is solved directly.",
+                taglish: "\"Upgrade ito ng Gaussian Elimination. Dito, hindi lang upper triangular ang goal—identity matrix dapat! Ibig sabihin, yung diagonal lang ang may 1, tapos zeroes na lahat. Ang advantage? Hindi mo na kailangan ng Back Substitution kasi ang answers ay nasa right side na agad.\"",
+                image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMjAwIj4KICA8ZyBmaWxsPSJub25lIiBzdHJva2U9IiM5NGEzYjgiIHN0cm9rZS13aWR0aD0iMSI+CiAgICA8cmVjdCB4PSIxMDAiIHk9IjQwIiB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIvPgogIDwvZz4KICA8ZyBmaWxsPSIjMWUzYThhIj4KICAgIDxjaXJjbGUgY3g9IjEyMCIgY3k9IjYwIiByPSI1Ii8+CiAgICA8Y2lyY2xlIGN4PSIxNjAiIGN5PSIxMDAiIHI9IjUiLz4KICAgIDxjaXJjbGUgY3g9IjIwMCIgY3k9IjE0MCIgcj0iNSIvPgogIDwvZz4KICA8ZyBmaWxsPSIjZTVlOGYwIj4KICAgIDxjaXJjbGUgY3g9IjEyMCIgY3k9IjEwMCIgcj0iNSIvPgogICAgPGNpcmNsZSBjeD0iMTIwIiBjeT0iMTQwIiByPSI1Ii8+CiAgICA8Y2lyY2xlIGN4PSIxNjAiIGN5PSI2MCIgcj0iNSIvPgogICAgPGNpcmNsZSBjeD0iMTYwIiBjeT0iMTQwIiByPSI1Ii8+CiAgICA8Y2lyY2xlIGN4PSIyMDAiIGN5PSI2MCIgcj0iNSIvPgogICAgPGNpcmNsZSBjeD0iMjAwIiBjeT0iMTAwIiByPSI1Ii8+CiAgPC9nPgogIDx0ZXh0IHg9IjIwMCIgeT0iMTgwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNjQ3NDhiIj5JZGVudGl0eSBNYXRyaXggKElycmVmKTwvdGV4dD4KPC9zdmc+"
+            },
+            {
+                id: 6,
+                title: "5. LU Decomposition",
+                english: "Factoring the matrix [A] into a product of a Lower triangular matrix [L] and an Upper triangular matrix [U].\n\n[A] = [L][U]\n\nSolving Ax = B becomes:\n1. Solve Ly = B (Forward substitution)\n2. Solve Ux = y (Backward substitution)",
+                taglish: "\"Dito, 'hinahati' natin ang matrix [A] sa dalawa: [L]ower at [U]pper triangular matrices. Bakit? Kasi mas madaling mag-solve pag triangular na. Sobrang efficient nito lalo na kung marami kang set ng 'B' (yung constant terms) na kailangang i-solve gamit ang parehong 'A'.\"",
+                image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMjAwIj4KICA8dGV4dCB4PSIxMDAiIHk9IjEwMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjMWUzYThhIj5BPC90ZXh0PgogIDx0ZXh0IHg9IjE1MCIgeT0iMTAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IiMzMzQxNTUiPj08L3RleHQ+CiAgPHBhdGggZD0iTSAxODAgMTQwIEwgMjQwIDE0MCBMIDI0MCA4MCBaIiBmaWxsPSIjYmJlMmZmIi8+CiAgPHRleHQgeD0iMjEwIiB5PSIxMjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjMWU0MGFmIj5MPC90ZXh0PgogIDxwYXRoIGQ9Ik0gMjYwIDYwIEwgMzIwIDYwIEwgMjYwIDEyMCBaIiBmaWxsPSIjZmViZWY0Ii8+CiAgPHRleHQgeD0iMjgwIiB5PSI4MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IiM5MjQwMGUiPlU8L3RleHQ+Cjwvc3ZnPg=="
+            },
+            {
+                id: 7,
+                title: "6. Why LU Decomposition?",
+                english: "Efficiency: Once [A] is decomposed into [L] and [U], we can solve for different [B] vectors very quickly. This is useful in structural engineering and other fields where the 'load' (B) changes but the 'structure' (A) remains constant.",
+                taglish: "\"Gamitin mo ito pag ang matrix [A] mo ay hindi nagbabago, pero yung right side [B] ay laging bago. Imbis na ulit-ulitin ang Gaussian Elimination sa bawat 'B', i-decompose mo lang si [A] once, tapos solve-solve na lang. Sobrang tipid sa oras!\""
+            },
+            {
+                id: 8,
+                title: "7. Pitfalls: Division by Zero",
+                english: "Numerical methods can fail if a pivot element (a_ii) is zero, leading to division by zero.\n\nSolution: Pivoting (Row Swapping). We swap the current row with a lower row that has the largest absolute value in the pivot column to maintain stability and avoid zero divisors.",
+                taglish: "\"Ingat lang tayo sa 'Pivot'. Kapag zero yung divisor mo, error agad! Kaya kailangan natin mag-'Pivoting' o maglipat ng rows para hindi zero ang divisor. Importante ito para manatiling accurate ang results natin.\""
+            }
+        ];
+
+        // --- COMPONENTS ---
+
+        const SlidePreview = ({ slide }) => {
+            if (!slide) return null;
+
+            return (
+                <div className="slide-preview-container" id={`slide-${slide.id}`}>
+                    <div className="slide-header">
+                        <h2 className="slide-title">{slide.title}</h2>
+                    </div>
+                    
+                    <div className="slide-body">
+                        <div className="slide-content-wrapper">
+                            <div className="slide-text-col">
+                                {slide.english}
+                            </div>
+                            {slide.image && (
+                                <div className="slide-image-col">
+                                    <img 
+                                        src={slide.image} 
+                                        alt={slide.title} 
+                                        className="slide-image"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    
+                    <div className="slide-footer">
+                        <div className="slide-taglish-text">
+                            {slide.taglish}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [activeSlideId, setActiveSlideId] = useState(SLIDES[0].id);
+            const [isExporting, setIsExporting] = useState(false);
+            const [logs, setLogs] = useState([]);
+            const [progress, setProgress] = useState({ current: 0, total: SLIDES.length });
+            const logEndRef = useRef(null);
+            
+            const activeSlide = SLIDES.find(s => s.id === activeSlideId);
+
+            useEffect(() => {
+                if (logEndRef.current) {
+                    logEndRef.current.scrollIntoView({ behavior: "smooth" });
+                }
+            }, [logs]);
+
+            const addLog = (msg) => setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
+
+            const captureSlide = async (slide) => {
+                const element = document.getElementById(`slide-${slide.id}`);
+                if (!element) return null;
+                
+                // Temporarily ensure it's visible and properly sized
+                const canvas = await html2canvas(element, {
+                    scale: 2, // Higher resolution
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: "#ffffff"
+                });
+                return canvas;
+            };
+
+            const handleExportZip = async () => {
+                if (isExporting) return;
+                setIsExporting(true);
+                setLogs([]);
+                setProgress({ current: 0, total: SLIDES.length });
+                addLog("Starting ZIP export...");
+
+                try {
+                    const zip = new JSZip();
+                    const imgFolder = zip.folder("slides");
+
+                    for (let i = 0; i < SLIDES.length; i++) {
+                        const slide = SLIDES[i];
+                        addLog(`Processing slide ${i + 1}/${SLIDES.length}: "${slide.title}"`);
+                        setProgress({ current: i + 1, total: SLIDES.length });
+                        
+                        setActiveSlideId(slide.id);
+                        await new Promise(r => setTimeout(r, 500)); // Wait for render
+                        
+                        const canvas = await captureSlide(slide);
+                        if (canvas) {
+                            const dataUrl = canvas.toDataURL("image/png");
+                            const base64Data = dataUrl.replace(/^data:image\/(png|jpg);base64,/, "");
+                            imgFolder.file(`slide_${(i + 1).toString().padStart(2, '0')}.png`, base64Data, { base64: true });
+                        }
+                    }
+                    
+                    addLog("Generating ZIP file...");
+                    const content = await zip.generateAsync({ type: "blob" });
+                    saveAs(content, "Linear_Equations_Direct_Course.zip");
+                    addLog("ZIP export complete!");
+                    await new Promise(r => setTimeout(r, 2000));
+                } catch (err) { 
+                    console.error(err); 
+                    addLog(`CRITICAL ERROR: ${err.message}`);
+                    alert("Error exporting ZIP"); 
+                } 
+                finally { setIsExporting(false); }
+            };
+
+            const handleExportPdf = async () => {
+                if (isExporting) return;
+                setIsExporting(true);
+                setLogs([]);
+                setProgress({ current: 0, total: SLIDES.length });
+                addLog("Starting PDF export...");
+
+                try {
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF('l', 'mm', 'a4'); 
+                    const pdfW = pdf.internal.pageSize.getWidth();
+                    const pdfH = pdf.internal.pageSize.getHeight();
+
+                    for (let i = 0; i < SLIDES.length; i++) {
+                        const slide = SLIDES[i];
+                        addLog(`Processing slide ${i + 1}/${SLIDES.length}: "${slide.title}"`);
+                        setProgress({ current: i + 1, total: SLIDES.length });
+
+                        setActiveSlideId(slide.id);
+                        await new Promise(r => setTimeout(r, 500));
+
+                        const canvas = await captureSlide(slide);
+                        if (canvas) {
+                            const imgData = canvas.toDataURL('image/jpeg', 0.8);
+                            if (i > 0) pdf.addPage();
+                            
+                            const renderH = pdfW * (9/16);
+                            const posY = (pdfH - renderH) / 2;
+                            pdf.addImage(imgData, 'JPEG', 0, posY, pdfW, renderH);
+                        }
+                    }
+                    
+                    addLog("Saving PDF file...");
+                    pdf.save("Linear_Equations_Direct_Course.pdf");
+                    addLog("PDF export complete!");
+                    await new Promise(r => setTimeout(r, 2000));
+                } catch (err) { 
+                    console.error(err); 
+                    addLog(`CRITICAL ERROR: ${err.message}`);
+                    alert("Error exporting PDF"); 
+                } 
+                finally { setIsExporting(false); }
+            };
+
+            return (
+                <div className="flex h-screen overflow-hidden relative">
+                    <div className="w-80 bg-gray-900 border-r border-gray-700 flex flex-col text-white shadow-xl z-10">
+                        <div className="p-6 border-b border-gray-700 bg-gray-800">
+                            <h1 className="font-bold text-xl text-amber-400">Direct Methods</h1>
+                            <p className="text-sm text-gray-400 mt-1">Numerical Methods Course</p>
+                        </div>
+                        
+                        <div className="flex-grow overflow-y-auto p-0">
+                            {SLIDES.map((slide, idx) => (
+                                <div 
+                                    key={slide.id}
+                                    onClick={() => !isExporting && setActiveSlideId(slide.id)}
+                                    className={`p-4 border-b border-gray-800 cursor-pointer transition-all hover:bg-gray-800 ${ 
+                                        slide.id === activeSlideId ? 'bg-blue-900 border-l-4 border-l-blue-400' : ''
+                                    } ${isExporting ? 'opacity-50 pointer-events-none' : ''}`}
+                                >
+                                    <div className="font-medium text-sm text-gray-300 truncate">
+                                        {idx + 1}. {slide.title}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="p-6 border-t border-gray-700 bg-gray-800 space-y-3">
+                            <button 
+                                onClick={handleExportZip} 
+                                disabled={isExporting}
+                                className="w-full py-2 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white rounded shadow text-sm font-semibold transition-colors"
+                            >
+                                Download Images (ZIP)
+                            </button>
+                            <button 
+                                onClick={handleExportPdf}
+                                disabled={isExporting} 
+                                className="w-full py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded shadow text-sm font-semibold transition-colors"
+                            >
+                                Download PDF
+                            </button>
+                            <a href="index.html" className="block text-center text-xs text-gray-400 hover:text-white mt-2">← Back to Course Home</a>
+                        </div>
+                    </div>
+
+                    <div className="flex-grow bg-gray-800 flex items-center justify-center p-10 overflow-auto relative">
+                        <div style={{ transform: 'scale(0.85)', transformOrigin: 'center' }}>
+                             <SlidePreview slide={activeSlide} />
+                        </div>
+                    </div>
+
+                    {isExporting && (
+                        <div className="absolute inset-0 bg-black/80 z-50 flex items-center justify-center">
+                            <div className="bg-gray-800 p-8 rounded-xl shadow-2xl max-w-2xl w-full border border-gray-600">
+                                <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-3">
+                                    <span className="animate-spin">⏳</span> Exporting...
+                                </h2>
+                                <div className="w-full bg-gray-700 rounded-full h-4 mb-2 overflow-hidden">
+                                    <div 
+                                        className="bg-blue-500 h-full transition-all duration-300 ease-out"
+                                        style={{ width: `${(progress.current / progress.total) * 100}%` }}
+                                    ></div>
+                                </div>
+                                <div className="flex justify-between text-gray-400 text-sm mb-6">
+                                    <span>Progress</span>
+                                    <span>{progress.current} / {progress.total} slides</span>
+                                </div>
+                                <div className="bg-black/50 rounded p-4 font-mono text-xs text-green-400 h-48 overflow-y-auto border border-gray-700 shadow-inner">
+                                    {logs.map((log, i) => (
+                                        <div key={i} className="mb-1 border-b border-gray-800 pb-1 last:border-0">{log}</div>
+                                    ))}
+                                    <div ref={logEndRef} />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

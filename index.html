@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Numerical Methods Online Course</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600&display=swap');
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        .header-font {
+            font-family: 'Montserrat', sans-serif;
+        }
+        .course-card {
+            transition: all 0.3s ease;
+            border: 1px solid #1e293b;
+        }
+        .course-card:hover {
+            transform: translateY(-5px);
+            border-color: #3b82f6;
+            box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <header class="p-8 border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-10">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <h1 class="header-font text-3xl font-800 bg-gradient-to-r from-blue-400 to-amber-400 bg-clip-text text-transparent">
+                Numerical Methods
+            </h1>
+            <nav>
+                <a href="https://github.com/omniadocemus" class="text-slate-400 hover:text-white transition-colors">GitHub: omniadocemus</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-6xl mx-auto p-8 py-16 w-full">
+        <div class="text-center mb-16">
+            <h2 class="header-font text-5xl font-800 mb-6 text-white leading-tight">Master the Art of <br/>Numerical Computation</h2>
+            <p class="text-xl text-slate-400 max-w-3xl mx-auto">
+                Interactive, Taglish-explained modules designed for engineers and computer scientists. Bridge the gap between theory and application.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Module 1 -->
+            <a href="introduction-to-numerical-methods.html" class="course-card bg-slate-900 p-8 rounded-2xl flex flex-col h-full">
+                <div class="bg-blue-500/10 text-blue-400 text-xs font-bold uppercase tracking-widest mb-4 px-3 py-1 rounded-full w-fit">
+                    Module 1
+                </div>
+                <h3 class="header-font text-2xl font-bold mb-4 text-white">Introduction to Numerical Methods</h3>
+                <p class="text-slate-400 mb-8 flex-grow">
+                    Learn the foundations: Accuracy, Precision, Errors (Round-off & Truncation), and the powerful Taylor Series.
+                </p>
+                <div class="flex items-center text-blue-400 font-semibold group">
+                    Start Learning <span class="ml-2 group-hover:translate-x-1 transition-transform">→</span>
+                </div>
+            </a>
+
+            <!-- Module 2 -->
+            <a href="linear-algebraic-equations-direct.html" class="course-card bg-slate-900 p-8 rounded-2xl flex flex-col h-full">
+                <div class="bg-amber-500/10 text-amber-400 text-xs font-bold uppercase tracking-widest mb-4 px-3 py-1 rounded-full w-fit">
+                    Module 2
+                </div>
+                <h3 class="header-font text-2xl font-bold mb-4 text-white">Linear Algebraic Equations (Direct)</h3>
+                <p class="text-slate-400 mb-8 flex-grow">
+                    Master Gaussian Elimination, Gauss-Jordan, and LU Decomposition for solving complex systems of equations.
+                </p>
+                <div class="flex items-center text-amber-400 font-semibold group">
+                    Start Learning <span class="ml-2 group-hover:translate-x-1 transition-transform">→</span>
+                </div>
+            </a>
+        </div>
+    </main>
+
+    <footer class="p-8 border-t border-slate-800 text-center text-slate-500 text-sm">
+        <p>&copy; 2026 Numerical Methods Course • <a href="https://github.com/omniadocemus" class="hover:text-white">omniadocemus</a></p>
+    </footer>
+</body>
+</html>
