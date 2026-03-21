@@ -3,364 +3,420 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Linear Algebraic Equations (Iterative Methods) - Course Viewer</title>
-    
-    <!-- Tailwind CSS -->
+    <title>Iterative Methods: Jacobi & Gauss-Seidel</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    
-    <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
-    <!-- Export Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <!-- KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:ital,wght@0,400;0,600;1,400&display=swap');
 
         .slide-preview-container {
-            width: 1280px;
-            height: 720px;
-            background-color: white;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            width: 1280px; height: 720px;
+            background-color: white; position: relative; overflow: hidden;
+            display: flex; flex-direction: column;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,.1);
             font-family: 'Open Sans', sans-serif;
         }
-
         .slide-header {
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-            padding: 2rem 4rem;
-            color: white;
-            flex-shrink: 0;
-            border-bottom: 6px solid #10b981; /* Emerald accent */
+            background: linear-gradient(135deg,#1e293b 0%,#334155 100%);
+            padding: 1.4rem 3.5rem; color: white; flex-shrink: 0;
+            border-bottom: 6px solid #10b981;
         }
-
         .slide-title {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 3rem;
-            font-weight: 800;
-            margin: 0;
-            line-height: 1.1;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-family: 'Montserrat', sans-serif; font-size: 2.4rem;
+            font-weight: 800; margin: 0; line-height: 1.1;
         }
-
         .slide-body {
-            flex-grow: 1;
-            padding: 2rem 4rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            flex-grow: 1; padding: 1.4rem 3.5rem;
+            display: flex; align-items: flex-start; justify-content: center;
             background-color: #f8fafc;
             background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
-            background-size: 24px 24px;
-            overflow: hidden;
+            background-size: 24px 24px; overflow: hidden;
         }
-
-        .slide-content-wrapper {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            gap: 2rem;
-            width: 100%;
-            height: 100%;
-        }
-
         .slide-text-col {
-            flex: 1.2;
-            font-size: 1.1rem;
-            color: #334155;
-            line-height: 1.4;
-            font-weight: 500;
-            white-space: pre-line;
-            max-height: 100%;
+            width: 100%; max-height: 100%; overflow: hidden;
         }
-
-        .slide-image-col {
-            flex: 0.8;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-        }
-
-        .slide-image {
-            max-width: 100%;
-            max-height: 400px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            background: white;
-            padding: 10px;
-        }
-        
         .slide-footer {
-            background-color: #f1f5f9;
-            border-top: 2px solid #e2e8f0;
-            padding: 1rem 3rem;
-            min-height: 120px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
+            background-color: #f1f5f9; border-top: 2px solid #e2e8f0;
+            padding: 0.7rem 3rem; min-height: 100px;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
-
         .slide-taglish-text {
-            font-size: 1.2rem;
-            color: #475569;
-            font-style: italic;
-            text-align: center;
-            line-height: 1.4;
-            background: #d1fae5;
-            padding: 0.75rem 1.5rem;
-            border-radius: 12px;
+            font-size: 1.1rem; color: #475569; font-style: italic;
+            text-align: center; line-height: 1.4; background: #d1fae5;
+            padding: 0.6rem 1.2rem; border-radius: 12px;
             border-left: 6px solid #059669;
         }
-
-        .excel-step {
-            background: #f1f5f9;
-            border-left: 4px solid #10b981;
-            padding: 0.5rem 1rem;
-            margin-top: 0.5rem;
-            font-family: monospace;
-            font-size: 0.9rem;
-        }
+        .katex-display { margin: 0.3em 0 !important; }
     </style>
 </head>
 <body class="bg-gray-800 h-screen overflow-hidden text-slate-800 font-sans">
-    <div id="root"></div>
+<div id="root"></div>
 
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
 
-        const SLIDES = [
-            {
-                id: 1,
-                title: "Iterative Methods: Jacobi & Gauss-Seidel",
-                english: "Iterative means \"repeat until done.\"\n\nInstead of solving in one pass, iterative methods:\n  1. Start with a wild guess (usually x=0, y=0, z=0)\n  2. Plug the guesses into the equations to get better guesses\n  3. Repeat until the numbers stop changing\n\nAnalogy: Adjusting a shower temperature. You turn the knob, test, adjust, test again. Each turn gets you closer. You stop when it feels right.\n\nWe will use this example system for all slides:\n  10x +  2y +   z =  7   → solved for x: x = (7  - 2y - z) / 10\n    x +  5y +   z = -8   → solved for y: y = (-8 - x - z) / 5\n   2x +  3y + 10z =  6   → solved for z: z = (6  - 2x - 3y) / 10\n\nAnswer: x = 1, y = -2, z = 1",
-                taglish: "\"Ang Iterative Methods ay parang 'trial and error' pero may system. Magsisimula ka sa hula (guess), tapos uulitin mo yung formula hanggang sa tumama ka sa sagot. Mas okay ito sa mga dambuhalang systems of equations na baka mag-hang ang computer pag Gaussian elimination ang ginamit.\""
-            },
-            {
-                id: 2,
-                title: "1. The Jacobi Method (Theory)",
-                english: "Jacobi Method — Step by Step with numbers:\n\nEquations rearranged:\n  x = (7  - 2y - z) / 10\n  y = (-8 - x  - z) / 5\n  z = (6  - 2x - 3y) / 10\n\nIteration 0 (starting guess): x=0, y=0, z=0\n\nIteration 1 — use ONLY the old values (0, 0, 0):\n  x_new = (7  - 2(0) - 0) / 10 = 0.7\n  y_new = (-8 - 0   - 0) / 5  = -1.6\n  z_new = (6  - 2(0) - 3(0)) / 10 = 0.6\n\nIteration 2 — use ONLY the values from iteration 1 (0.7, -1.6, 0.6):\n  x_new = (7  - 2(-1.6) - 0.6) / 10 = 1.02\n  y_new = (-8 - 0.7    - 0.6) / 5  = -1.86\n  z_new = (6  - 2(0.7) - 3(-1.6)) / 10 = 0.94\n\nKeep going until x≈1, y≈-2, z≈1",
-                taglish: "\"Sa Jacobi, kailangan mo i-isolate yung variable (x = ...). Ang rule dito: Lahat ng gagamitin mong values ay galing sa 'lumang' iteration. Kahit na-solve mo na yung x1, yung lumang x1 pa rin ang gagamitin mo para i-solve si x2.\"",
-                image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMjAwIj4KICA8cmVjdCB4PSI1MCIgeT0iNTAiIHdpZHRoPSIzMDAiIGhlaWdodD0iMTAwIiByeD0iMTQiIGZpbGw9IiNmOGZhZmMiIHN0cm9rZT0iIzY0NzQ4YiIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPHRleHQgeD0iODAiIHk9Ijk1IiBmaWxsPSIjMWU0MGFmIiBmb250LWZhbWlseT0ibW9ub3NwYWNlIiBmb250LXNpemU9IjE2Ij5LIDA6IFswLCAwLCAwXTwvdGV4dD4KICA8dGV4dCB4PSI4MCIgeT0iMTI1IiBmaWxsPSIjMDU5NjY5IiBmb250LWZhbWlseT0ibW9ub3NwYWNlIiBmb250LXNpemU9IjE2Ij5LIDE6IFsxLjIsIDAuNSwgLTEuM108L3RleHQ+CiAgPHBhdGggZD0iTSAzMzAgMTAwIEwgMzYwIDEwMCBMIDM0NSAxMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzEwYjk4MSIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPHRleHQgeD0iMjAwIiB5PSIxODAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM2NDc0OGIiPlNpbXVsdGFuZW91cyBVcGRhdGU8L3RleHQ+Cjwvc3ZnPg=="
-            },
-            {
-                id: 3,
-                title: "2. Jacobi Method: Excel Guide",
-                english: "How to do Jacobi in Excel — a table approach:\n\nSetup your spreadsheet like this:\n  Column A: Iteration number (0, 1, 2, 3...)\n  Column B: x values\n  Column C: y values\n  Column D: z values\n\nRow 1 (Iteration 0): Type  0  in B1, C1, and D1 (your starting guesses)\n\nRow 2 (Iteration 1): Type these formulas (they reference ROW 1):\n  B2: =(7 - 2*C1 - D1) / 10\n  C2: =(-8 - B1 - D1) / 5\n  D2: =(6 - 2*B1 - 3*C1) / 10\n\nNow select B2:D2 and drag the selection DOWN for about 20 rows.\n\nWatch the numbers settle! When B, C, D stop changing between rows, you have your answer.",
-                taglish: "\"Sa Excel: Gawa ka ng table. Sa Row 1, lagay mo yung hula mo (0, 0, 0). Sa Row 2, i-type mo yung formula pero i-click mo yung cells sa Row 1. Pagkatapos, i-highlight mo yung Row 2 at i-drag pababa. Pag hindi na gumagalaw yung values, nahanap mo na ang sagot!\"",
-                image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMjAwIj4KICA8cmVjdCB4PSI1MCIgeT0iNDAiIHdpZHRoPSIzMDAiIGhlaWdodD0iMTIwIiBmaWxsPSJ3aGl0ZSIgc3Ryb2tlPSIjZDJmYWU1Ii8+CiAgPGxpbmUgeDE9IjUwIiB5MT0iNzAiIHgyPSIzNTAiIHkyPSI3MCIgc3Ryb2tlPSIjMTBiOTgxIi8+CiAgPGxpbmUgeDE9IjEwMCIgeTE9IjQwIiB4Mj0iMTAwIiB5Mj0iMTYwIiBzdHJva2U9IiMxMGI5ODEiLz4KICA8dGV4dCB4PSI2MCIgeT0iNjAiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiMwNDc4NTciPkl0ZXI8L3RleHQ+CiAgPHRleHQgeD0iMTEwIiB5PSI2MCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzA0Nzg1NyI+eCA9ICg3LTIqQjIpLzM8L3RleHQ+Cjwvc3ZnPg=="
-            },
-            {
-                id: 4,
-                title: "3. The Gauss-Seidel Method (Theory)",
-                english: "Gauss-Seidel Method — same equations, smarter update rule:\n\nEquations (same as Jacobi):\n  x = (7  - 2y - z) / 10\n  y = (-8 - x  - z) / 5\n  z = (6  - 2x - 3y) / 10\n\nIteration 1 starting from x=0, y=0, z=0:\n  x_new = (7  - 2(0)    - 0   ) / 10 = 0.7    ← same as Jacobi so far\n  y_new = (-8 - 0.7    - 0   ) / 5  = -1.74   ← uses x_new=0.7 immediately!\n  z_new = (6  - 2(0.7) - 3(-1.74)) / 10 = 0.98  ← uses both x_new and y_new!\n\nCompare to Jacobi Iteration 1: y_new = -1.6 (less accurate)\n\nBecause Gauss-Seidel uses fresh values right away, it typically converges in HALF the iterations of Jacobi.",
-                taglish: "\"Ang Gauss-Seidel ay 'mabilis' na version. Pag na-compute mo na yung bagong x, gagamitin mo na agad siya sa pag-compute ng y sa parehong row. Hindi mo na hihintayin yung next iteration. Parang tsismis—pag nalaman mo, pinapasa mo na agad!\""
-            },
-            {
-                id: 5,
-                title: "4. Gauss-Seidel: Excel Guide (Pro)",
-                english: "Gauss-Seidel in Excel — the Circular Reference trick:\n\nStep 1: Turn on iterative calculation\n  File → Options → Formulas → check \"Enable Iterative Calculation\" → set to 100 iterations → OK\n\nStep 2: Type formulas in a single row (A1, B1, C1) — they reference each other:\n  A1 (x): =(7 - 2*B1 - C1) / 10\n  B1 (y): =(-8 - A1 - C1) / 5\n  C1 (z): =(6 - 2*A1 - 3*B1) / 10\n\nStep 3: Press Enter after each formula. Excel will automatically iterate!\n\nResult: A1 = 1, B1 = -2, C1 = 1 (the answer appears instantly)\n\nWhy does this work? When \"Iterative Calculation\" is on, Excel keeps recalculating circular formulas until they stop changing.",
-                taglish: "\"Pro Tip: Gamitin ang Circular Reference. Enable mo yung 'Iterative Calculation' sa Excel Settings. Tapos i-type mo lang yung formulas sa magkakatabing cells na nagre-reference sa isa't isa. Magic! Sasagutan na ni Excel yan nang kusa sa isang click lang.\"",
-                image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMjAwIj4KICA8cmVjdCB4PSI1MCIgeT0iNDAiIHdpZHRoPSIzMDAiIGhlaWdodD0iMTQwIiByeD0iMTAiIGZpbGw9IiNmOGZhaGMiIHN0cm9rZT0iIzA1OTY2OSIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPHRleHQgeD0iNzAiIHk9IjgwIiBmb250LXdlaWdodD0iYm9sZCI+WCBGb3JtdWxhOiA9KDctWSlaPC90ZXh0PgogIDx0ZXh0IHg9IjcwIiB5PSIxMTAiIGZvbnQtd2VpZ2h0PSJib2xkIj5ZIEZvcm11bGE6ID0oMTAtWCkvMjwvdGV4dD4KICA8Y2lyY2xlIGN4PSIyNTAiIGN5PSIxNTAiIHI9IjIwIiBmaWxsPSIjMTBiOTgxIi8+CiAgPHRleHQgeD0iMjUwIiB5PSIxNTUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIiBmb250LXNpemU9IjI0Ij4hPC90ZXh0Pgo8L3N2Zz4="
-            },
-            {
-                id: 6,
-                title: "5. When will it work? (Convergence)",
-                english: "These methods don't always work. Sometimes the answer gets WORSE with each iteration instead of better — this is called divergence.\n\nFor the method to work, your system must be \"Diagonally Dominant.\"\n\nWhat does that mean? For each row, the diagonal number must be bigger than all the other numbers in that row ADDED TOGETHER.\n\nCheck our example:\n  Row 1:  10x + 2y + z   → |10| > |2| + |1| = 3  ✓  (10 > 3)\n  Row 2:   x + 5y + z    → |5|  > |1| + |1| = 2  ✓  (5 > 2)\n  Row 3:  2x + 3y + 10z  → |10| > |2| + |3| = 5  ✓  (10 > 5)\n\nAll rows pass! Our system will converge.\n\nIf a row fails the check, try REORDERING the equations so the biggest numbers land on the diagonal.",
-                taglish: "\"Hala, bakit ayaw mag-solve? Siguro hindi 'Diagonally Dominant'. Ibig sabihin, dapat yung number sa diagonal (yung gitna) ang pinakamalaki sa row na yun. Kung hindi, kailangan mong pagpalit-palitin ang pwesto ng mga equations (Row Swapping) hanggang sa lumaki yung diagonal.\""
-            },
-            {
-                id: 7,
-                title: "6. Summary: Direct vs Iterative",
-                english: "Which method should you use?\n\nDIRECT (Gaussian Elimination):\n  ✓ Guaranteed answer — always works\n  ✓ Good when you have a small system (a few unknowns)\n  ✓ No special requirements on the numbers\n  ✗ Gets slow fast — 1000 equations = very slow\n\nITERATIVE (Jacobi / Gauss-Seidel):\n  ✓ Great for huge systems (thousands of equations)\n  ✓ Gauss-Seidel is faster than Jacobi\n  ✓ Easy to code and use in Excel\n  ✗ Requires diagonal dominance to work correctly\n  ✗ Answer is approximate (though very close)\n\nFor this course and Excel practice: Iterative methods are ideal because they are easy to set up in a spreadsheet.",
-                taglish: "\"Direct (Gaussian): Siguradong may sagot agad, basta maliit lang yung matrix. Parang manual na paglilinis ng kwarto.\n\nIterative (Gauss-Seidel): Pwedeng lumapit nang lumapit sa sagot, ideal sa sobrang laking systems. Parang Roomba—uulit-ulit siya hanggang luminis.\""
-            },
-            {
-                id: 8,
-                title: "7. Practice: 3 Excel Challenges",
-                english: "Try solving these in Excel using the methods learned:\n\nExample A (Easy):\n3x + y + z = 5\nx + 4y + z = 6\nx + y + 5z = 7\n(Ans: x=1, y=1, z=1)\n\nExample B (Negative results):\n10x + 2y + z = 7\nx + 5y + z = -8\n2x + 3y + 10z = 6\n(Ans: x=1, y=-2, z=1)\n\nExample C (Mixed):\n4x + y - z = 7\nx - 5y - z = 8\nx + y + 6z = 6\n(Ans: x=2, y=-1, z=1)",
-                taglish: "\"Subukan mo ito sa Excel! I-rearrange mo muna yung equations (isolate x, y, z). Example A: x = (5 - y - z)/3. Pag nag-match yung results mo sa answers dito, congrats! Master mo na ang Excel for Numerical Methods.\""
-            },
-            {
-                id: 9,
-                title: "8. Step-by-Step: Example A (Jacobi)",
-                english: "Step 1: Isolate variables:\nx = (5 - y - z) / 3\ny = (6 - x - z) / 4\nz = (7 - x - y) / 5\n\nStep 2: Setup Excel Table:\n- Row 1 (Iter 0): B1=0, C1=0, D1=0\n- Row 2 (Iter 1):\n  B2: =(5-C1-D1)/3\n  C2: =(6-B1-D1)/4\n  D2: =(7-B1-C1)/5\n\nStep 3: Drag down! You will see x, y, z approach 1.000.",
-                taglish: "\"Step-by-step para sa Example A: Isolate mo muna yung x, y, at z. Sa Row 2 ng Excel, i-type mo yung formulas. Tandaan, sa Jacobi, lahat ng reference cells mo ay dapat galing sa PREVIOUS row (Row 1). Pag-drag mo pababa, magiging 1, 1, 1 ang sagot.\""
-            },
-            {
-                id: 10,
-                title: "9. Step-by-Step: Example B (Gauss-Seidel)",
-                english: "Using the 'Circular Reference' method:\n\nStep 1: Enable Iterative Calculation in Options.\nStep 2: In Cell A1 (X), type: =(7 - 2*B1 - C1) / 10\nStep 3: In Cell B1 (Y), type: =(-8 - A1 - C1) / 5\nStep 4: In Cell C1 (Z), type: =(6 - 2*A1 - 3*B1) / 10\n\nResult: The cells will instantly change to X=1, Y=-2, Z=1.",
-                taglish: "\"Sa Gauss-Seidel Excel trick: Isulat mo lang yung formulas sa A1, B1, at C1. Dahil 'Iterative' ang settings natin, hindi mag-eerror si Excel kahit magka-reference sila. Mapapansin mo, mas mabilis ito kaysa sa Jacobi table!\""
-            }
-        ];
+/* ── KaTeX renderer ── */
+const K = ({ tex, block = true }) => {
+    const ref = useRef(null);
+    useEffect(() => {
+        if (ref.current && window.katex) {
+            try {
+                window.katex.render(tex, ref.current, {
+                    displayMode: block, throwOnError: false,
+                    trust: true, strict: false
+                });
+            } catch(e) { if (ref.current) ref.current.textContent = tex; }
+        }
+    }, [tex, block]);
+    return <span ref={ref} style={{ display: block ? 'block' : 'inline' }} />;
+};
 
-        const SlidePreview = ({ slide }) => {
-            if (!slide) return null;
+/* ── Content block renderer ── */
+const B = ({ b }) => {
+    if (b.type === 'p')
+        return <p style={{ marginBottom:'0.35rem', lineHeight:1.5, color:'#1e293b', fontSize:'0.93rem' }}>{b.text}</p>;
 
-            return (
-                <div className="slide-preview-container" id={`slide-${slide.id}`}>
-                    <div className="slide-header">
-                        <h2 className="slide-title">{slide.title}</h2>
-                    </div>
-                    
-                    <div className="slide-body">
-                        <div className="slide-content-wrapper">
-                            <div className="slide-text-col">
-                                {slide.english}
-                            </div>
-                            {slide.image && (
-                                <div className="slide-image-col">
-                                    <img 
-                                        src={slide.image} 
-                                        alt={slide.title} 
-                                        className="slide-image"
-                                    />
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                    
-                    <div className="slide-footer">
-                        <div className="slide-taglish-text">
-                            {slide.taglish}
-                        </div>
-                    </div>
+    if (b.type === 'math')
+        return <div style={{ margin:'0.35rem 0', textAlign:'center' }}><K tex={b.tex} block={true} /></div>;
+
+    if (b.type === 'label')
+        return <p style={{ fontWeight:700, color:'#065f46', fontSize:'0.75rem', textTransform:'uppercase',
+                           letterSpacing:'0.07em', margin:'0.45rem 0 0.1rem' }}>{b.text}</p>;
+
+    if (b.type === 'steps')
+        return <ol style={{ paddingLeft:'1.3rem', margin:'0.15rem 0', lineHeight:1.55 }}>
+            {b.items.map((it,i) => <li key={i} style={{ marginBottom:'0.18rem', color:'#1e293b', fontSize:'0.88rem' }}>{it}</li>)}
+        </ol>;
+
+    if (b.type === 'code')
+        return <pre style={{ background:'#0f172a', color:'#86efac', padding:'0.38rem 0.7rem',
+                             borderRadius:'6px', fontFamily:'monospace', fontSize:'0.76rem',
+                             margin:'0.22rem 0', lineHeight:1.6, whiteSpace:'pre' }}>{b.text}</pre>;
+
+    if (b.type === 'note')
+        return <div style={{ background:'#f0fdf4', borderLeft:'4px solid #10b981',
+                             padding:'0.28rem 0.65rem', borderRadius:'0 6px 6px 0',
+                             margin:'0.3rem 0', fontSize:'0.84rem', color:'#065f46', lineHeight:1.4 }}>{b.text}</div>;
+
+    if (b.type === 'warn')
+        return <div style={{ background:'#fefce8', borderLeft:'4px solid #eab308',
+                             padding:'0.28rem 0.65rem', borderRadius:'0 6px 6px 0',
+                             margin:'0.3rem 0', fontSize:'0.84rem', color:'#713f12', lineHeight:1.4 }}>{b.text}</div>;
+
+    if (b.type === 'table')
+        return <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'0.78rem', margin:'0.2rem 0' }}>
+            <thead>
+                <tr style={{ background:'#1e3a8a' }}>
+                    {b.headers.map((h,i) => <th key={i} style={{ padding:'0.22rem 0.4rem', textAlign:'center', color:'white', fontWeight:600 }}>{h}</th>)}
+                </tr>
+            </thead>
+            <tbody>
+                {b.rows.map((row,i) => <tr key={i} style={{ background: i%2===0 ? '#f8fafc' : '#eff6ff' }}>
+                    {row.map((cell,j) => <td key={j} style={{ padding:'0.2rem 0.4rem', textAlign:'center',
+                                                              borderBottom:'1px solid #e2e8f0',
+                                                              fontFamily: j>0 ? 'monospace' : 'inherit' }}>{cell}</td>)}
+                </tr>)}
+            </tbody>
+        </table>;
+
+    return null;
+};
+
+/* ══════════════════════════════════════════════
+   SLIDES
+══════════════════════════════════════════════ */
+const SLIDES = [
+{
+    id: 1,
+    title: "Iterative Methods: Jacobi & Gauss-Seidel",
+    content: [
+        { type:'p', text:'Iterative means "repeat until done." Instead of solving in one pass:' },
+        { type:'steps', items:[
+            'Start with a guess: x = 0,  y = 0,  z = 0',
+            'Plug the guess into rearranged equations → get better values',
+            'Repeat until the numbers stop changing (converge to the true answer)',
+        ]},
+        { type:'label', text:'System used throughout all slides:' },
+        { type:'math', tex:'\\begin{aligned}10x + 2y + z &= 7 \\\\ x + 5y + z &= -8 \\\\ 2x + 3y + 10z &= 6\\end{aligned}' },
+        { type:'note', text:'✓  True answer:  x = 1,  y = −2,  z = 1.  Both methods converge here.' },
+    ],
+    taglish: '"Ang iterative methods ay parang trial-and-error pero may sistema. Simulan sa hula (0,0,0), i-plug sa formulas, ulitin hanggang hindi na nagbabago. Mas mabilis ito kumpara sa Gaussian Elimination para sa malalaking systems na may libu-libong equations."',
+},
+{
+    id: 2,
+    title: "1. Jacobi — Rearranging the System",
+    content: [
+        { type:'p', text:'Before iterating, isolate each variable (move it to the left side alone). For our system:' },
+        { type:'math', tex:'\\begin{aligned} x &= \\dfrac{7 - 2y - z}{10} \\\\[6pt] y &= \\dfrac{-8 - x - z}{5} \\\\[6pt] z &= \\dfrac{6 - 2x - 3y}{10} \\end{aligned}' },
+        { type:'note', text:'General rule: move every term except the diagonal one to the right side, then divide by its coefficient.' },
+        { type:'label', text:'General Jacobi formula:' },
+        { type:'math', tex:'x_i^{(k+1)} = \\dfrac{b_i \\;-\\; \\displaystyle\\sum_{j \\neq i} a_{ij}\\, x_j^{(k)}}{a_{ii}}' },
+    ],
+    taglish: '"I-isolate mo muna ang bawat variable. Para sa x, ilipat mo lahat ng y at z sa kanan, tapos hatiin sa coefficient ng x (yung 10). Ganun din para sa y at z. Pagkatapos, ready na tayong mag-iterate!"',
+},
+{
+    id: 3,
+    title: "1. Jacobi — Key Rule & Iterations",
+    content: [
+        { type:'warn', text:'KEY RULE: When computing x, y, z in round k+1 — use ONLY the OLD values from round k.  Even if you already computed a new x, you still use the old x when computing y.' },
+        { type:'label', text:'Iteration table (starting from x=0, y=0, z=0):' },
+        { type:'table',
+          headers:['Iter (k)','x','y','z'],
+          rows:[
+            ['0','0.0000','0.0000','0.0000'],
+            ['1','0.7000','−1.6000','0.6000'],
+            ['2','0.9600','−1.8600','0.9400'],
+            ['3','0.9780','−1.9800','0.9660'],
+            ['4','0.9994','−1.9888','0.9984'],
+            ['⋮','⋮','⋮','⋮'],
+            ['∞','1.0000','−2.0000','1.0000'],
+          ]},
+        { type:'note', text:'Each row uses only the row above it. Values creep toward 1, −2, 1 slowly.' },
+    ],
+    taglish: '"Tignan mo ang table: bawat row ay gumagalaw papalapit sa tamang sagot. Ang Row 1 ay ginawa gamit Row 0 (lahat ng 0). Ang Row 2 gamit Row 1, at iba pa. Pag hindi na nagbabago ang digits, tapos na. Tandaan: parehong row ang pinagkukunan ng lahat ng values sa Jacobi!"',
+},
+{
+    id: 4,
+    title: "2. Jacobi — Excel Step-by-Step",
+    content: [
+        { type:'label', text:'Set up columns:  A = Iter  |  B = x  |  C = y  |  D = z' },
+        { type:'steps', items:[
+            'Row 1 (Iter 0): type  0  in B1, C1, D1  (the starting guesses)',
+            'Row 2 (Iter 1): type the formulas below — they reference ROW 1 only:',
+        ]},
+        { type:'code', text:'B2: =(7 - 2*C1 - D1) / 10      ← uses C1 (old y) and D1 (old z)\nC2: =(-8 - B1 - D1) / 5       ← uses B1 (old x) and D1 (old z)\nD2: =(6 - 2*B1 - 3*C1) / 10   ← uses B1 (old x) and C1 (old y)' },
+        { type:'steps', items:[
+            'Select B2:D2 → drag DOWN about 20 rows',
+            'Watch B, C, D settle toward  1,  −2,  1',
+        ]},
+        { type:'warn', text:'Jacobi rule in Excel: every formula references the row ABOVE.  Never the same row as you are typing in.' },
+    ],
+    taglish: '"Sa Excel: gawa ng table, lagay 0 sa Row 1, tapos sa Row 2 i-type mo ang formulas na nag-r-reference sa Row 1. I-drag pababa. Pag tumigil na sa pagbabago ang values, yun na ang sagot. Tandaan: laging one row UP ang reference para sa Jacobi!"',
+},
+{
+    id: 5,
+    title: "3. Gauss-Seidel — The Key Difference",
+    content: [
+        { type:'p', text:'Same rearranged equations as Jacobi. The only change: use each newly computed value immediately — do not wait for the next round.' },
+        { type:'label', text:'Gauss-Seidel formulas — green shows where new values are used right away:' },
+        { type:'math', tex:'\\begin{aligned} x^{(k+1)} &= \\dfrac{7 - 2y^{(k)} - z^{(k)}}{10} \\\\[8pt] y^{(k+1)} &= \\dfrac{-8 - \\textcolor{green}{x^{(k+1)}} - z^{(k)}}{5} \\\\[8pt] z^{(k+1)} &= \\dfrac{6 - 2\\textcolor{green}{x^{(k+1)}} - 3\\textcolor{green}{y^{(k+1)}}}{10} \\end{aligned}' },
+        { type:'note', text:'Green (k+1) = the value just computed THIS round.  Jacobi would use the old (k) value there instead.' },
+    ],
+    taglish: '"Ang Gauss-Seidel ay katulad ng Jacobi, PERO: pagkatapos mong makuha ang bagong x, gagamitin mo na agad siya sa pag-compute ng y sa PAREHONG round. Hindi mo na hihintayin ang susunod na iteration. Parang tsismis — pag nalaman mo, ipinasa mo na agad!"',
+},
+{
+    id: 6,
+    title: "3. Gauss-Seidel — Iterations vs Jacobi",
+    content: [
+        { type:'p', text:'Both start from x=0, y=0, z=0.  Compare how fast each converges:' },
+        { type:'table',
+          headers:['Iter (k)','Jacobi x','GS x','Jacobi y','GS y','Jacobi z','GS z'],
+          rows:[
+            ['0','0.000','0.000','0.000','0.000','0.000','0.000'],
+            ['1','0.700','0.700','−1.600','−1.740','0.600','0.982'],
+            ['2','0.960','0.950','−1.860','−1.986','0.940','1.006'],
+            ['3','0.978','0.997','−1.980','−2.001','0.966','1.001'],
+            ['∞','1.000','1.000','−2.000','−2.000','1.000','1.000'],
+          ]},
+        { type:'note', text:'Gauss-Seidel reaches z ≈ 0.982 after just 1 iteration vs Jacobi\'s 0.600 — already 6× closer to z=1.' },
+    ],
+    taglish: '"Kita mo sa table? Sa iteration 1 pa lang, ang z ng Gauss-Seidel ay 0.982 na — malapit na sa 1. Pero ang z ng Jacobi ay 0.600 pa lang. Sa iteration 3, ang Gauss-Seidel ay practically exact na! Mas mabilis siya kasi ginagamit niya ang pinakabagong values agad-agad."',
+},
+{
+    id: 7,
+    title: "4. Gauss-Seidel — Excel Step-by-Step",
+    content: [
+        { type:'p', text:'Use the Circular Reference method — all 3 formulas in ONE row, referencing each other.' },
+        { type:'label', text:'Step 1 — Enable Iterative Calculation:' },
+        { type:'code', text:'File  →  Options  →  Formulas  →  ☑ Enable Iterative Calculation\nMaximum Iterations: 100   →   OK' },
+        { type:'label', text:'Step 2 — Type these 3 formulas in cells A1, B1, C1:' },
+        { type:'code', text:'A1 (x): =(7 - 2*B1 - C1) / 10\nB1 (y): =(-8 - A1 - C1) / 5\nC1 (z): =(6 - 2*A1 - 3*B1) / 10' },
+        { type:'steps', items:['Press Enter after each formula. Excel iterates automatically.'] },
+        { type:'note', text:'Result: A1 = 1,  B1 = −2,  C1 = 1 — instant answer, no dragging needed.' },
+    ],
+    taglish: '"Ito ang pinaka-magic na trick! Enable mo lang ang Iterative Calculation sa Settings, tapos i-type mo ang 3 formulas sa iisang row na nagre-reference sa isa\'t isa. Circular reference normally = error, pero kapag naka-enable ang Iterative Calculation, gagawin na ni Excel ang looping para sa atin!"',
+},
+{
+    id: 8,
+    title: "5. When Will It Work? (Convergence)",
+    content: [
+        { type:'p', text:'These methods only converge if the system is Diagonally Dominant — the diagonal coefficient in each row must be LARGER than all other coefficients in that row combined.' },
+        { type:'label', text:'Diagonal dominance condition (must hold for every row):' },
+        { type:'math', tex:'|a_{ii}| \\;>\\; \\sum_{j\\,\\neq\\,i} |a_{ij}|' },
+        { type:'label', text:'Check our system:' },
+        { type:'math', tex:'\\begin{aligned} \\text{Row 1:}\\quad |10| &> |2|+|1| = 3 &\\checkmark \\\\ \\text{Row 2:}\\quad |5| &> |1|+|1| = 2 &\\checkmark \\\\ \\text{Row 3:}\\quad |10| &> |2|+|3| = 5 &\\checkmark \\end{aligned}' },
+        { type:'warn', text:'If any row fails, reorder your equations so the largest coefficient in each row lands on the diagonal.' },
+    ],
+    taglish: '"Bakit minsan hindi nag-co-converge? Kasi hindi Diagonally Dominant ang system. Para i-check: sa bawat row, yung diagonal number (coefficient ng x sa row ng x) ay dapat mas malaki kaysa lahat ng iba. Kung hindi, i-swap mo ang rows para mapababa ang pinakamalaking coefficient sa diagonal!"',
+},
+{
+    id: 9,
+    title: "6. Summary — Jacobi vs Gauss-Seidel",
+    content: [
+        { type:'table',
+          headers:['','Jacobi','Gauss-Seidel'],
+          rows:[
+            ['Formula uses','Old values (k) for ALL','New values (k+1) as soon as computed'],
+            ['Speed','Slower','~2× faster than Jacobi'],
+            ['Excel method','Drag-down table (ref row above)','Circular reference (same row)'],
+            ['When to use','Easier to understand first','Use this in practice'],
+            ['Convergence','Requires diagonal dominance','Requires diagonal dominance'],
+            ['Answer type','Approximate (gets closer each step)','Approximate (gets closer each step)'],
+          ]},
+        { type:'note', text:'Both give the same final answer. Gauss-Seidel just gets there faster.' },
+    ],
+    taglish: '"Para sa pagsulit: Jacobi = drag-down table, bawat row nag-r-reference ng nakaraang row. Gauss-Seidel = circular reference sa isang row, mabilis na converge. Parehong kailangan ng diagonal dominance para gumana. Sa practice, mas preferred ang Gauss-Seidel dahil mas mabilis!"',
+},
+{
+    id: 10,
+    title: "7. Practice Problems",
+    content: [
+        { type:'p', text:'Solve each system in Excel using Jacobi (table method) AND Gauss-Seidel (circular reference). Check your answers match.' },
+        { type:'table',
+          headers:['System','Equations','True Answer'],
+          rows:[
+            ['A','3x+y+z=5,  x+4y+z=6,  x+y+5z=7','x=1, y=1, z=1'],
+            ['B','10x+2y+z=7,  x+5y+z=−8,  2x+3y+10z=6','x=1, y=−2, z=1'],
+            ['C','4x+y−z=7,  x−5y−z=8,  x+y+6z=6','x=2, y=−1, z=1'],
+          ]},
+        { type:'label', text:'Before each: check diagonal dominance. Rearrange if needed.' },
+        { type:'math', tex:'\\text{System A, rearranged:}\\quad x = \\frac{5-y-z}{3},\\quad y = \\frac{6-x-z}{4},\\quad z = \\frac{7-x-y}{5}' },
+    ],
+    taglish: '"Try mo lahat ng tatlo! Para sa System A: isolate mo x = (5-y-z)/3. Sa Jacobi table, ang Row 2 formulas ay: B2=(5-C1-D1)/3, C2=(6-B1-D1)/4, D2=(7-B1-C1)/5. Para sa Gauss-Seidel: same formulas pero sa isang row lang na nagre-reference sa isa\'t isa. Congrats kung na-match mo ang answers!"',
+},
+];
+
+/* ── Slide component ── */
+const SlidePreview = ({ slide }) => {
+    if (!slide) return null;
+    return (
+        <div className="slide-preview-container" id={`slide-${slide.id}`}>
+            <div className="slide-header">
+                <h2 className="slide-title">{slide.title}</h2>
+            </div>
+            <div className="slide-body">
+                <div className="slide-text-col">
+                    {slide.content.map((b, i) => <B key={i} b={b} />)}
                 </div>
-            );
-        };
+            </div>
+            <div className="slide-footer">
+                <div className="slide-taglish-text">{slide.taglish}</div>
+            </div>
+        </div>
+    );
+};
 
-        const App = () => {
-            const [activeSlideId, setActiveSlideId] = useState(SLIDES[0].id);
-            const [isExporting, setIsExporting] = useState(false);
-            const [logs, setLogs] = useState([]);
-            const [progress, setProgress] = useState({ current: 0, total: SLIDES.length });
-            const logEndRef = useRef(null);
-            
-            const activeSlide = SLIDES.find(s => s.id === activeSlideId);
+/* ── App ── */
+const App = () => {
+    const [activeSlideId, setActiveSlideId] = useState(SLIDES[0].id);
+    const [isExporting, setIsExporting] = useState(false);
+    const [logs, setLogs] = useState([]);
+    const [progress, setProgress] = useState({ current: 0, total: SLIDES.length });
+    const logEndRef = useRef(null);
+    const activeSlide = SLIDES.find(s => s.id === activeSlideId);
 
-            useEffect(() => {
-                if (logEndRef.current) {
-                    logEndRef.current.scrollIntoView({ behavior: "smooth" });
+    useEffect(() => { logEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [logs]);
+    const addLog = msg => setLogs(p => [...p, `[${new Date().toLocaleTimeString()}] ${msg}`]);
+
+    const captureSlide = async (slide) => {
+        const el = document.getElementById(`slide-${slide.id}`);
+        if (!el) return null;
+        return html2canvas(el, { scale: 2, useCORS: true, logging: false, backgroundColor: '#fff' });
+    };
+
+    const handleExportPdf = async () => {
+        setIsExporting(true); setLogs([]);
+        addLog('Starting PDF export…');
+        try {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('l', 'mm', 'a4');
+            const W = pdf.internal.pageSize.getWidth();
+            const H = pdf.internal.pageSize.getHeight();
+            for (let i = 0; i < SLIDES.length; i++) {
+                const slide = SLIDES[i];
+                addLog(`Capturing: ${slide.title}`);
+                setProgress({ current: i+1, total: SLIDES.length });
+                setActiveSlideId(slide.id);
+                await new Promise(r => setTimeout(r, 700));
+                const canvas = await captureSlide(slide);
+                if (canvas) {
+                    const img = canvas.toDataURL('image/jpeg', 0.85);
+                    if (i > 0) pdf.addPage();
+                    const rH = W * (9/16);
+                    pdf.addImage(img, 'JPEG', 0, (H - rH) / 2, W, rH);
                 }
-            }, [logs]);
+            }
+            pdf.save('Jacobi_GaussSeidel_Guide.pdf');
+            addLog('Done!');
+        } catch(err) { addLog(`Error: ${err.message}`); }
+        finally { setIsExporting(false); }
+    };
 
-            const addLog = (msg) => setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
-
-            const captureSlide = async (slide) => {
-                const element = document.getElementById(`slide-${slide.id}`);
-                if (!element) return null;
-                const canvas = await html2canvas(element, { scale: 2, useCORS: true, logging: false, backgroundColor: "#ffffff" });
-                return canvas;
-            };
-
-            const handleExportPdf = async () => {
-                setIsExporting(true);
-                setLogs([]);
-                addLog("Starting PDF export...");
-
-                try {
-                    const { jsPDF } = window.jspdf;
-                    const pdf = new jsPDF('l', 'mm', 'a4'); 
-                    const pdfW = pdf.internal.pageSize.getWidth();
-                    const pdfH = pdf.internal.pageSize.getHeight();
-
-                    for (let i = 0; i < SLIDES.length; i++) {
-                        const slide = SLIDES[i];
-                        addLog(`Capturing ${slide.title}...`);
-                        setProgress({ current: i + 1, total: SLIDES.length });
-                        setActiveSlideId(slide.id);
-                        await new Promise(r => setTimeout(r, 600));
-
-                        const canvas = await captureSlide(slide);
-                        if (canvas) {
-                            const imgData = canvas.toDataURL('image/jpeg', 0.8);
-                            if (i > 0) pdf.addPage();
-                            const renderH = pdfW * (9/16);
-                            const posY = (pdfH - renderH) / 2;
-                            pdf.addImage(imgData, 'JPEG', 0, posY, pdfW, renderH);
-                        }
-                    }
-                    pdf.save("Iterative_Methods_Excel_Guide.pdf");
-                    addLog("Done!");
-                } catch (err) { addLog(`Error: ${err.message}`); }
-                finally { setIsExporting(false); }
-            };
-
-            return (
-                <div className="flex h-screen overflow-hidden relative">
-                    <div className="w-80 bg-slate-900 border-r border-slate-700 flex flex-col text-white z-10">
-                        <div className="p-6 border-b border-slate-700 bg-slate-800">
-                            <h1 className="font-bold text-xl text-emerald-400">Iterative Methods</h1>
-                            <p className="text-sm text-slate-400 mt-1">Excel Step-by-Step</p>
-                        </div>
-                        
-                        <div className="flex-grow overflow-y-auto p-0">
-                            {SLIDES.map((slide, idx) => (
-                                <div 
-                                    key={slide.id}
-                                    onClick={() => !isExporting && setActiveSlideId(slide.id)}
-                                    className={`p-4 border-b border-slate-800 cursor-pointer transition-all hover:bg-slate-800 ${ 
-                                        slide.id === activeSlideId ? 'bg-emerald-900 border-l-4 border-l-emerald-400' : ''
-                                    }`}
-                                >
-                                    <div className="font-medium text-sm text-slate-300">
-                                        {idx + 1}. {slide.title}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        <div className="p-6 border-t border-slate-700 bg-slate-800 space-y-3">
-                            <button 
-                                onClick={handleExportPdf}
-                                disabled={isExporting} 
-                                className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded shadow text-sm font-semibold transition-colors"
-                            >
-                                Download PDF Guide
-                            </button>
-                            <a href="index.html" className="block text-center text-xs text-slate-400 hover:text-white mt-2">← Back to Course Home</a>
-                        </div>
-                    </div>
-
-                    <div className="flex-grow bg-slate-800 flex items-center justify-center p-10 overflow-auto">
-                        <div style={{ transform: 'scale(0.85)', transformOrigin: 'center' }}>
-                             <SlidePreview slide={activeSlide} />
-                        </div>
-                    </div>
-
-                    {isExporting && (
-                        <div className="absolute inset-0 bg-black/80 z-50 flex items-center justify-center">
-                            <div className="bg-slate-800 p-8 rounded-xl max-w-2xl w-full border border-slate-600">
-                                <h2 className="text-2xl font-bold text-white mb-4">Exporting Guide...</h2>
-                                <div className="w-full bg-slate-700 rounded-full h-4 mb-6 overflow-hidden">
-                                    <div className="bg-emerald-500 h-full" style={{ width: `${(progress.current / progress.total) * 100}%` }}></div>
-                                </div>
-                                <div className="bg-black/50 rounded p-4 font-mono text-xs text-emerald-400 h-48 overflow-y-auto">
-                                    {logs.map((log, i) => <div key={i}>{log}</div>)}
-                                    <div ref={logEndRef} />
-                                </div>
-                            </div>
-                        </div>
-                    )}
+    return (
+        <div className="flex h-screen overflow-hidden relative">
+            {/* Sidebar */}
+            <div className="w-80 bg-slate-900 border-r border-slate-700 flex flex-col text-white z-10">
+                <div className="p-6 border-b border-slate-700 bg-slate-800">
+                    <h1 className="font-bold text-xl text-emerald-400">Iterative Methods</h1>
+                    <p className="text-sm text-slate-400 mt-1">Jacobi &amp; Gauss-Seidel</p>
                 </div>
-            );
-        };
+                <div className="flex-grow overflow-y-auto">
+                    {SLIDES.map((slide, idx) => (
+                        <div key={slide.id}
+                             onClick={() => !isExporting && setActiveSlideId(slide.id)}
+                             className={`p-4 border-b border-slate-800 cursor-pointer transition-all hover:bg-slate-800 ${
+                                 slide.id === activeSlideId ? 'bg-emerald-900 border-l-4 border-l-emerald-400' : ''}`}>
+                            <div className="font-medium text-sm text-slate-300">{idx+1}. {slide.title}</div>
+                        </div>
+                    ))}
+                </div>
+                <div className="p-6 border-t border-slate-700 bg-slate-800 space-y-3">
+                    <button onClick={handleExportPdf} disabled={isExporting}
+                            className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded shadow text-sm font-semibold transition-colors">
+                        Download PDF Guide
+                    </button>
+                    <a href="index.html" className="block text-center text-xs text-slate-400 hover:text-white mt-2">← Back to Course Home</a>
+                </div>
+            </div>
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
+            {/* Slide viewer */}
+            <div className="flex-grow bg-slate-800 flex items-center justify-center p-8 overflow-auto">
+                <div style={{ transform: 'scale(0.82)', transformOrigin: 'center' }}>
+                    <SlidePreview slide={activeSlide} />
+                </div>
+            </div>
+
+            {/* Export overlay */}
+            {isExporting && (
+                <div className="absolute inset-0 bg-black/80 z-50 flex items-center justify-center">
+                    <div className="bg-slate-800 p-8 rounded-xl max-w-2xl w-full border border-slate-600">
+                        <h2 className="text-2xl font-bold text-white mb-4">Exporting…</h2>
+                        <div className="w-full bg-slate-700 rounded-full h-4 mb-6 overflow-hidden">
+                            <div className="bg-emerald-500 h-full transition-all"
+                                 style={{ width: `${(progress.current/progress.total)*100}%` }}></div>
+                        </div>
+                        <div className="bg-black/50 rounded p-4 font-mono text-xs text-emerald-400 h-48 overflow-y-auto">
+                            {logs.map((l,i) => <div key={i}>{l}</div>)}
+                            <div ref={logEndRef} />
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
 </body>
 </html>
