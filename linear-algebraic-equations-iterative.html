@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linear Algebraic Equations (Iterative Methods) - Course Viewer</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Export Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:ital,wght@0,400;0,600;1,400&display=swap');
+
+        .slide-preview-container {
+            width: 1280px;
+            height: 720px;
+            background-color: white;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        .slide-header {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            padding: 2rem 4rem;
+            color: white;
+            flex-shrink: 0;
+            border-bottom: 6px solid #10b981; /* Emerald accent */
+        }
+
+        .slide-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 3rem;
+            font-weight: 800;
+            margin: 0;
+            line-height: 1.1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .slide-body {
+            flex-grow: 1;
+            padding: 2rem 4rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8fafc;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 24px 24px;
+            overflow: hidden;
+        }
+
+        .slide-content-wrapper {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 2rem;
+            width: 100%;
+            height: 100%;
+        }
+
+        .slide-text-col {
+            flex: 1.2;
+            font-size: 1.1rem;
+            color: #334155;
+            line-height: 1.4;
+            font-weight: 500;
+            white-space: pre-line;
+            max-height: 100%;
+        }
+
+        .slide-image-col {
+            flex: 0.8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        .slide-image {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: white;
+            padding: 10px;
+        }
+        
+        .slide-footer {
+            background-color: #f1f5f9;
+            border-top: 2px solid #e2e8f0;
+            padding: 1rem 3rem;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .slide-taglish-text {
+            font-size: 1.2rem;
+            color: #475569;
+            font-style: italic;
+            text-align: center;
+            line-height: 1.4;
+            background: #d1fae5;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            border-left: 6px solid #059669;
+        }
+
+        .excel-step {
+            background: #f1f5f9;
+            border-left: 4px solid #10b981;
+            padding: 0.5rem 1rem;
+            margin-top: 0.5rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-800 h-screen overflow-hidden text-slate-800 font-sans">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const SLIDES = [
+            {
+                id: 1,
+                title: "Iterative Methods: Jacobi & Gauss-Seidel",
+                english: "Iterative methods solve linear systems by starting with an initial guess and repeatedly refining it until it converges to the true solution.\n\nUnlike Direct Methods (which solve in one go), these are better for massive systems (thousands of equations) where Gaussian elimination would be too slow.",
+                taglish: "\"Ang Iterative Methods ay parang 'trial and error' pero may system. Magsisimula ka sa hula (guess), tapos uulitin mo yung formula hanggang sa tumama ka sa sagot. Mas okay ito sa mga dambuhalang systems of equations na baka mag-hang ang computer pag Gaussian elimination ang ginamit.\""
+            },
+            {
+                id: 2,
+                title: "1. The Jacobi Method (Theory)",
+                english: "In Jacobi, you solve each equation for one variable (x1, x2, ...).\n\nKey Rule: In every iteration, you ONLY use the values from the PREVIOUS iteration to calculate the new ones.\n\nFormula for x_i:\nx_i = (b_i - Σ a_ij * x_j_old) / a_ii",
+                taglish: "\"Sa Jacobi, kailangan mo i-isolate yung variable (x = ...). Ang rule dito: Lahat ng gagamitin mong values ay galing sa 'lumang' iteration. Kahit na-solve mo na yung x1, yung lumang x1 pa rin ang gagamitin mo para i-solve si x2.\"",
+                image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMjAwIj4KICA8cmVjdCB4PSI1MCIgeT0iNTAiIHdpZHRoPSIzMDAiIGhlaWdodD0iMTAwIiByeD0iMTQiIGZpbGw9IiNmOGZhZmMiIHN0cm9rZT0iIzY0NzQ4YiIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPHRleHQgeD0iODAiIHk9Ijk1IiBmaWxsPSIjMWU0MGFmIiBmb250LWZhbWlseT0ibW9ub3NwYWNlIiBmb250LXNpemU9IjE2Ij5LIDA6IFswLCAwLCAwXTwvdGV4dD4KICA8dGV4dCB4PSI4MCIgeT0iMTI1IiBmaWxsPSIjMDU5NjY5IiBmb250LWZhbWlseT0ibW9ub3NwYWNlIiBmb250LXNpemU9IjE2Ij5LIDE6IFsxLjIsIDAuNSwgLTEuM108L3RleHQ+CiAgPHBhdGggZD0iTSAzMzAgMTAwIEwgMzYwIDEwMCBMIDM0NSAxMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzEwYjk4MSIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPHRleHQgeD0iMjAwIiB5PSIxODAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM2NDc0OGIiPlNpbXVsdGFuZW91cyBVcGRhdGU8L3RleHQ+Cjwvc3ZnPg=="
+            },
+            {
+                id: 3,
+                title: "2. Jacobi Method: Excel Guide",
+                english: "To do Jacobi in Excel using the Table Method:\n\n1. Prepare: Rewrite equations as x = (b - ax2 - ax3)/a1.\n2. Column A: 'Iteration' (0, 1, 2...)\n3. Column B, C, D: Variables x, y, z.\n4. Row 1 (Iter 0): Enter your initial guesses (usually 0).\n5. Row 2 (Iter 1): Enter the formula using cell references from Row 1.\n6. Drag down until the numbers stop changing.",
+                taglish: "\"Sa Excel: Gawa ka ng table. Sa Row 1, lagay mo yung hula mo (0, 0, 0). Sa Row 2, i-type mo yung formula pero i-click mo yung cells sa Row 1. Pagkatapos, i-highlight mo yung Row 2 at i-drag pababa. Pag hindi na gumagalaw yung values, nahanap mo na ang sagot!\"",
+                image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMjAwIj4KICA8cmVjdCB4PSI1MCIgeT0iNDAiIHdpZHRoPSIzMDAiIGhlaWdodD0iMTIwIiBmaWxsPSJ3aGl0ZSIgc3Ryb2tlPSIjZDJmYWU1Ii8+CiAgPGxpbmUgeDE9IjUwIiB5MT0iNzAiIHgyPSIzNTAiIHkyPSI3MCIgc3Ryb2tlPSIjMTBiOTgxIi8+CiAgPGxpbmUgeDE9IjEwMCIgeTE9IjQwIiB4Mj0iMTAwIiB5Mj0iMTYwIiBzdHJva2U9IiMxMGI5ODEiLz4KICA8dGV4dCB4PSI2MCIgeT0iNjAiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiMwNDc4NTciPkl0ZXI8L3RleHQ+CiAgPHRleHQgeD0iMTEwIiB5PSI2MCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzA0Nzg1NyI+eCA9ICg3LTIqQjIpLzM8L3RleHQ+Cjwvc3ZnPg=="
+            },
+            {
+                id: 4,
+                title: "3. The Gauss-Seidel Method (Theory)",
+                english: "Gauss-Seidel is the 'Fast Version' of Jacobi.\n\nKey Difference: As soon as you calculate a new value (like x1), you IMMEDIATELY use it to calculate the next variables (x2, x3) within the SAME iteration.\n\nThis usually makes it converge much faster than Jacobi.",
+                taglish: "\"Ang Gauss-Seidel ay 'mabilis' na version. Pag na-compute mo na yung bagong x, gagamitin mo na agad siya sa pag-compute ng y sa parehong row. Hindi mo na hihintayin yung next iteration. Parang tsismis—pag nalaman mo, pinapasa mo na agad!\""
+            },
+            {
+                id: 5,
+                title: "4. Gauss-Seidel: Excel Guide (Pro)",
+                english: "The easiest way to do Gauss-Seidel in Excel is the 'Circular Reference' method:\n\n1. Go to File > Options > Formulas.\n2. Check 'Enable Iterative Calculation'. Set Max Iterations to 100.\n3. In Cell A1, type your formula for X referencing B1 and C1.\n4. In Cell B1, type your formula for Y referencing A1 and C1.\n5. Excel will automatically solve it instantly!",
+                taglish: "\"Pro Tip: Gamitin ang Circular Reference. Enable mo yung 'Iterative Calculation' sa Excel Settings. Tapos i-type mo lang yung formulas sa magkakatabing cells na nagre-reference sa isa't isa. Magic! Sasagutan na ni Excel yan nang kusa sa isang click lang.\"",
+                image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMjAwIj4KICA8cmVjdCB4PSI1MCIgeT0iNDAiIHdpZHRoPSIzMDAiIGhlaWdodD0iMTQwIiByeD0iMTAiIGZpbGw9IiNmOGZhaGMiIHN0cm9rZT0iIzA1OTY2OSIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPHRleHQgeD0iNzAiIHk9IjgwIiBmb250LXdlaWdodD0iYm9sZCI+WCBGb3JtdWxhOiA9KDctWSlaPC90ZXh0PgogIDx0ZXh0IHg9IjcwIiB5PSIxMTAiIGZvbnQtd2VpZ2h0PSJib2xkIj5ZIEZvcm11bGE6ID0oMTAtWCkvMjwvdGV4dD4KICA8Y2lyY2xlIGN4PSIyNTAiIGN5PSIxNTAiIHI9IjIwIiBmaWxsPSIjMTBiOTgxIi8+CiAgPHRleHQgeD0iMjUwIiB5PSIxNTUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIiBmb250LXNpemU9IjI0Ij4hPC90ZXh0Pgo8L3N2Zz4="
+            },
+            {
+                id: 6,
+                title: "5. When will it work? (Convergence)",
+                english: "Both methods ONLY work if the matrix is Diagonally Dominant.\n\nDefinition: The absolute value of the diagonal element must be GREATER than the sum of the absolute values of the other elements in that row.\n\n|a_ii| > Σ |a_ij| (for j ≠ i)",
+                taglish: "\"Hala, bakit ayaw mag-solve? Siguro hindi 'Diagonally Dominant'. Ibig sabihin, dapat yung number sa diagonal (yung gitna) ang pinakamalaki sa row na yun. Kung hindi, kailangan mong pagpalit-palitin ang pwesto ng mga equations (Row Swapping) hanggang sa lumaki yung diagonal.\""
+            },
+            {
+                id: 7,
+                title: "6. Summary: Direct vs Iterative",
+                english: "Direct (Gaussian):\n- Exact answer (finite steps)\n- Better for small/medium systems\n- Always works (unless singular)\n\nIterative (Gauss-Seidel):\n- Approximate answer (infinite steps)\n- Better for huge/sparse systems\n- Uses less memory",
+                taglish: "\"Direct (Gaussian): Siguradong may sagot agad, basta maliit lang yung matrix. Parang manual na paglilinis ng kwarto.\n\nIterative (Gauss-Seidel): Pwedeng lumapit nang lumapit sa sagot, ideal sa sobrang laking systems. Parang Roomba—uulit-ulit siya hanggang luminis.\""
+            }
+        ];
+
+        const SlidePreview = ({ slide }) => {
+            if (!slide) return null;
+
+            return (
+                <div className="slide-preview-container" id={`slide-${slide.id}`}>
+                    <div className="slide-header">
+                        <h2 className="slide-title">{slide.title}</h2>
+                    </div>
+                    
+                    <div className="slide-body">
+                        <div className="slide-content-wrapper">
+                            <div className="slide-text-col">
+                                {slide.english}
+                            </div>
+                            {slide.image && (
+                                <div className="slide-image-col">
+                                    <img 
+                                        src={slide.image} 
+                                        alt={slide.title} 
+                                        className="slide-image"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    
+                    <div className="slide-footer">
+                        <div className="slide-taglish-text">
+                            {slide.taglish}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [activeSlideId, setActiveSlideId] = useState(SLIDES[0].id);
+            const [isExporting, setIsExporting] = useState(false);
+            const [logs, setLogs] = useState([]);
+            const [progress, setProgress] = useState({ current: 0, total: SLIDES.length });
+            const logEndRef = useRef(null);
+            
+            const activeSlide = SLIDES.find(s => s.id === activeSlideId);
+
+            useEffect(() => {
+                if (logEndRef.current) {
+                    logEndRef.current.scrollIntoView({ behavior: "smooth" });
+                }
+            }, [logs]);
+
+            const addLog = (msg) => setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
+
+            const captureSlide = async (slide) => {
+                const element = document.getElementById(`slide-${slide.id}`);
+                if (!element) return null;
+                const canvas = await html2canvas(element, { scale: 2, useCORS: true, logging: false, backgroundColor: "#ffffff" });
+                return canvas;
+            };
+
+            const handleExportPdf = async () => {
+                setIsExporting(true);
+                setLogs([]);
+                addLog("Starting PDF export...");
+
+                try {
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF('l', 'mm', 'a4'); 
+                    const pdfW = pdf.internal.pageSize.getWidth();
+                    const pdfH = pdf.internal.pageSize.getHeight();
+
+                    for (let i = 0; i < SLIDES.length; i++) {
+                        const slide = SLIDES[i];
+                        addLog(`Capturing ${slide.title}...`);
+                        setProgress({ current: i + 1, total: SLIDES.length });
+                        setActiveSlideId(slide.id);
+                        await new Promise(r => setTimeout(r, 600));
+
+                        const canvas = await captureSlide(slide);
+                        if (canvas) {
+                            const imgData = canvas.toDataURL('image/jpeg', 0.8);
+                            if (i > 0) pdf.addPage();
+                            const renderH = pdfW * (9/16);
+                            const posY = (pdfH - renderH) / 2;
+                            pdf.addImage(imgData, 'JPEG', 0, posY, pdfW, renderH);
+                        }
+                    }
+                    pdf.save("Iterative_Methods_Excel_Guide.pdf");
+                    addLog("Done!");
+                } catch (err) { addLog(`Error: ${err.message}`); }
+                finally { setIsExporting(false); }
+            };
+
+            return (
+                <div className="flex h-screen overflow-hidden relative">
+                    <div className="w-80 bg-slate-900 border-r border-slate-700 flex flex-col text-white z-10">
+                        <div className="p-6 border-b border-slate-700 bg-slate-800">
+                            <h1 className="font-bold text-xl text-emerald-400">Iterative Methods</h1>
+                            <p className="text-sm text-slate-400 mt-1">Excel Step-by-Step</p>
+                        </div>
+                        
+                        <div className="flex-grow overflow-y-auto p-0">
+                            {SLIDES.map((slide, idx) => (
+                                <div 
+                                    key={slide.id}
+                                    onClick={() => !isExporting && setActiveSlideId(slide.id)}
+                                    className={`p-4 border-b border-slate-800 cursor-pointer transition-all hover:bg-slate-800 ${ 
+                                        slide.id === activeSlideId ? 'bg-emerald-900 border-l-4 border-l-emerald-400' : ''
+                                    }`}
+                                >
+                                    <div className="font-medium text-sm text-slate-300">
+                                        {idx + 1}. {slide.title}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="p-6 border-t border-slate-700 bg-slate-800 space-y-3">
+                            <button 
+                                onClick={handleExportPdf}
+                                disabled={isExporting} 
+                                className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded shadow text-sm font-semibold transition-colors"
+                            >
+                                Download PDF Guide
+                            </button>
+                            <a href="index.html" className="block text-center text-xs text-slate-400 hover:text-white mt-2">← Back to Course Home</a>
+                        </div>
+                    </div>
+
+                    <div className="flex-grow bg-slate-800 flex items-center justify-center p-10 overflow-auto">
+                        <div style={{ transform: 'scale(0.85)', transformOrigin: 'center' }}>
+                             <SlidePreview slide={activeSlide} />
+                        </div>
+                    </div>
+
+                    {isExporting && (
+                        <div className="absolute inset-0 bg-black/80 z-50 flex items-center justify-center">
+                            <div className="bg-slate-800 p-8 rounded-xl max-w-2xl w-full border border-slate-600">
+                                <h2 className="text-2xl font-bold text-white mb-4">Exporting Guide...</h2>
+                                <div className="w-full bg-slate-700 rounded-full h-4 mb-6 overflow-hidden">
+                                    <div className="bg-emerald-500 h-full" style={{ width: `${(progress.current / progress.total) * 100}%` }}></div>
+                                </div>
+                                <div className="bg-black/50 rounded p-4 font-mono text-xs text-emerald-400 h-48 overflow-y-auto">
+                                    {logs.map((log, i) => <div key={i}>{log}</div>)}
+                                    <div ref={logEndRef} />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
