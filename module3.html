@@ -145,13 +145,13 @@
             {
                 id: 1,
                 title: "Iterative Methods: Jacobi & Gauss-Seidel",
-                english: "Iterative methods solve linear systems by starting with an initial guess and repeatedly refining it until it converges to the true solution.\n\nUnlike Direct Methods (which solve in one go), these are better for massive systems (thousands of equations) where Gaussian elimination would be too slow.",
+                english: "Iterative methods use a clever strategy: start with a rough guess and keep improving it until the answer is close enough.\n\nSimple analogy: Imagine adjusting the temperature on a shower. You turn the knob, feel the water, adjust again — repeating until it's just right. That's iteration!\n\nWhy use these instead of direct methods?\n- Direct methods (Gaussian Elimination) are great for small systems.\n- But for HUGE systems (thousands of equations), they become too slow.\n- Iterative methods handle these large systems much more efficiently.\n\nThis module covers: Jacobi and Gauss-Seidel — two of the most popular iterative methods.",
                 taglish: "\"Ang Iterative Methods ay parang 'trial and error' pero may system. Magsisimula ka sa hula (guess), tapos uulitin mo yung formula hanggang sa tumama ka sa sagot. Mas okay ito sa mga dambuhalang systems of equations na baka mag-hang ang computer pag Gaussian elimination ang ginamit.\""
             },
             {
                 id: 2,
                 title: "1. The Jacobi Method (Theory)",
-                english: "In Jacobi, you solve each equation for one variable (x1, x2, ...).\n\nKey Rule: In every iteration, you ONLY use the values from the PREVIOUS iteration to calculate the new ones.\n\nFormula for x_i:\nx_i = (b_i - Σ a_ij * x_j_old) / a_ii",
+                english: "Step 1: Rearrange each equation to isolate one variable.\n  Example:  3x + y = 7  →  x = (7 - y) / 3\n\nStep 2: Start with an initial guess (usually x=0, y=0, z=0).\n\nStep 3: Plug the old guesses into the right-hand side to get new values.\n\nKey Rule — use OLD values only:\n  Even if you already computed a new x, you still use the OLD x to compute y in the same round. You update ALL variables at the end of each round.\n\nStep 4: Repeat until the values stop changing (they 'converge' to the answer).",
                 taglish: "\"Sa Jacobi, kailangan mo i-isolate yung variable (x = ...). Ang rule dito: Lahat ng gagamitin mong values ay galing sa 'lumang' iteration. Kahit na-solve mo na yung x1, yung lumang x1 pa rin ang gagamitin mo para i-solve si x2.\"",
                 image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMjAwIj4KICA8cmVjdCB4PSI1MCIgeT0iNTAiIHdpZHRoPSIzMDAiIGhlaWdodD0iMTAwIiByeD0iMTQiIGZpbGw9IiNmOGZhZmMiIHN0cm9rZT0iIzY0NzQ4YiIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPHRleHQgeD0iODAiIHk9Ijk1IiBmaWxsPSIjMWU0MGFmIiBmb250LWZhbWlseT0ibW9ub3NwYWNlIiBmb250LXNpemU9IjE2Ij5LIDA6IFswLCAwLCAwXTwvdGV4dD4KICA8dGV4dCB4PSI4MCIgeT0iMTI1IiBmaWxsPSIjMDU5NjY5IiBmb250LWZhbWlseT0ibW9ub3NwYWNlIiBmb250LXNpemU9IjE2Ij5LIDE6IFsxLjIsIDAuNSwgLTEuM108L3RleHQ+CiAgPHBhdGggZD0iTSAzMzAgMTAwIEwgMzYwIDEwMCBMIDM0NSAxMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzEwYjk4MSIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPHRleHQgeD0iMjAwIiB5PSIxODAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM2NDc0OGIiPlNpbXVsdGFuZW91cyBVcGRhdGU8L3RleHQ+Cjwvc3ZnPg=="
             },
@@ -165,7 +165,7 @@
             {
                 id: 4,
                 title: "3. The Gauss-Seidel Method (Theory)",
-                english: "Gauss-Seidel is the 'Fast Version' of Jacobi.\n\nKey Difference: As soon as you calculate a new value (like x1), you IMMEDIATELY use it to calculate the next variables (x2, x3) within the SAME iteration.\n\nThis usually makes it converge much faster than Jacobi.",
+                english: "Gauss-Seidel is the 'faster version' of Jacobi. The setup is the same — you still rearrange each equation to isolate a variable.\n\nKey Difference — use NEW values immediately:\n  As soon as you compute a new x, use it right away when computing y (in the SAME iteration). Don't wait for the next round!\n\nExample:\n  Iteration 1: Compute x_new = 1.5 → immediately use 1.5 when computing y_new\n  (Jacobi would have used x_old = 0 for y)\n\nResult: Gauss-Seidel usually reaches the answer in fewer iterations than Jacobi.",
                 taglish: "\"Ang Gauss-Seidel ay 'mabilis' na version. Pag na-compute mo na yung bagong x, gagamitin mo na agad siya sa pag-compute ng y sa parehong row. Hindi mo na hihintayin yung next iteration. Parang tsismis—pag nalaman mo, pinapasa mo na agad!\""
             },
             {
@@ -178,13 +178,13 @@
             {
                 id: 6,
                 title: "5. When will it work? (Convergence)",
-                english: "Both methods ONLY work if the matrix is Diagonally Dominant.\n\nDefinition: The absolute value of the diagonal element must be GREATER than the sum of the absolute values of the other elements in that row.\n\n|a_ii| > Σ |a_ij| (for j ≠ i)",
+                english: "These methods don't always work — the answer might never settle and instead keep changing wildly. This is called 'divergence'.\n\nFor guaranteed convergence, your system must be Diagonally Dominant:\n  → The number on the diagonal of each row must be LARGER (in absolute value) than all the other numbers in that row combined.\n\nExample (Row 1): | 10 | > | 2 | + | 1 | = 3 ✓  (10 > 3, so this row is fine)\n\nIf your system isn't diagonally dominant, try rearranging (swapping) the equations so the largest numbers land on the diagonal.",
                 taglish: "\"Hala, bakit ayaw mag-solve? Siguro hindi 'Diagonally Dominant'. Ibig sabihin, dapat yung number sa diagonal (yung gitna) ang pinakamalaki sa row na yun. Kung hindi, kailangan mong pagpalit-palitin ang pwesto ng mga equations (Row Swapping) hanggang sa lumaki yung diagonal.\""
             },
             {
                 id: 7,
                 title: "6. Summary: Direct vs Iterative",
-                english: "Direct (Gaussian):\n- Exact answer (finite steps)\n- Better for small/medium systems\n- Always works (unless singular)\n\nIterative (Gauss-Seidel):\n- Approximate answer (infinite steps)\n- Better for huge/sparse systems\n- Uses less memory",
+                english: "When should you use each?\n\nDirect Methods (Gaussian Elimination):\n✓ Gives exact answer in a fixed number of steps\n✓ Best for small to medium systems (up to ~1000 equations)\n✓ Always gives an answer (as long as the system isn't impossible)\n✗ Slow for very large systems\n\nIterative Methods (Jacobi / Gauss-Seidel):\n✓ Much faster for huge systems (thousands of equations)\n✓ Uses far less computer memory\n✗ Answer is approximate (but can be made very precise)\n✗ Only works if the matrix is diagonally dominant",
                 taglish: "\"Direct (Gaussian): Siguradong may sagot agad, basta maliit lang yung matrix. Parang manual na paglilinis ng kwarto.\n\nIterative (Gauss-Seidel): Pwedeng lumapit nang lumapit sa sagot, ideal sa sobrang laking systems. Parang Roomba—uulit-ulit siya hanggang luminis.\""
             },
             {
